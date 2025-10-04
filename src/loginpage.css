@@ -1,0 +1,62 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/CascadeStyleSheet.css to edit this template
+*/
+/* 
+    Created on : 03 Oct 2025, 12:18:55
+    Author     : tshif
+*/
+
+#rootPane {
+    -fx-background-color: #00001a;
+}
+
+#login-box {
+    -fx-background-color: rgba(0, 0, 0, 0.4);
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-padding: 40px;
+    -fx-effect: dropshadow(gaussian, rgba(138, 43, 226, 0.5), 50, 0.5, 0, 0);
+}
+
+#logo-text {
+    -fx-text-fill: #9370db; /* MediumPurple for violet glow */
+    -fx-effect: dropshadow(gaussian, #8a2be2, 20, 0.5, 0, 0); /* BlueViolet glow */
+}
+
+#username-field, #password-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: white;
+    -fx-prompt-text-fill: #b0c4de; /* LightSteelBlue for placeholders */
+    -fx-border-color: #4682b4; /* SteelBlue */
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+}
+
+#login-button {
+    -fx-background-color: linear-gradient(to right, #4169e1, #8a2be2); /* RoyalBlue to BlueViolet gradient */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-padding: 10 20;
+    -fx-border-radius: 20px;
+    -fx-background-radius: 20px;
+    -fx-effect: dropshadow(gaussian, rgba(65, 105, 225, 0.7), 20, 0.5, 0, 0); /* RoyalBlue glow */
+}
+
+#login-button:hover {
+    -fx-background-color: linear-gradient(to right, #4169e1, #8a2be2); /* Same gradient for hover */
+    -fx-effect: dropshadow(gaussian, rgba(65, 105, 225, 0.9), 30, 0.7, 0, 0); /* Stronger glow on hover */
+}
+
+#forgot-password {
+    -fx-text-fill: #add8e6; /* LightBlue */
+}
+
+#forgot-password:hover {
+    -fx-text-fill: #ffffff; /* White on hover */
+}
+
+HBox ImageView {
+    -fx-effect: dropshadow(three-pass-box, #87cefa, 10, 0.5, 0, 0); /* LightSkyBlue glow for icons */
+}
+

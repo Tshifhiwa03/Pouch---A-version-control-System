@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.text.Font?>
+
+<?import javafx.geometry.Pos?>
+
+<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="https://www.google.com/search?q=http://javafx.com/javafx/21">
+<children>
+<Label text="Welcome to the Home Page!">
+<font>
+<Font name="System Bold" size="24.0" />
+</font>
+</Label>
+<Label text="You have successfully logged in." />
+</children>
+</VBox>

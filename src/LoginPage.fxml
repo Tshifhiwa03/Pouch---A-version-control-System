@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+
+<?import javafx.scene.control.Button?>
+
+<?import javafx.scene.control.Hyperlink?>
+
+<?import javafx.scene.control.Label?>
+
+<?import javafx.scene.control.PasswordField?>
+
+<?import javafx.scene.control.TextField?>
+
+<?import javafx.scene.image.Image?>
+
+<?import javafx.scene.image.ImageView?>
+
+<?import javafx.scene.layout.HBox?>
+
+<?import javafx.scene.layout.StackPane?>
+
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.text.Font?>
+
+<StackPane fx:id="rootPane" stylesheets="@loginpage.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginPageController">
+<VBox id="login-box" alignment="CENTER" spacing="20">
+<Label id="logo-text" text="CodeCub">
+<font>
+<Font name="System Bold" size="30.0" />
+</font>
+</Label>
+<HBox alignment="CENTER_LEFT" spacing="10">
+<ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+<image>
+<Image url="@user_icon.png" />
+</image>
+</ImageView>
+<TextField fx:id="usernameField" id="username-field" prefWidth="250" promptText="Enter your password username" />
+</HBox>
+<HBox alignment="CENTER_LEFT" spacing="10">
+<ImageView fitHeight="20" fitWidth="20" preserveRatio="true">
+<image>
+<Image url="@lock_icon.png" />
+</image>
+</ImageView>
+<PasswordField fx:id="passwordField" id="password-field" prefWidth="250" promptText="Enter your Pouch password" />
+</HBox>
+<!-- ADDED fx:id="loginButton" and onAction="#handleLoginButtonAction" -->
+<Button fx:id="loginButton" id="login-button" onAction="#handleLoginButtonAction" prefWidth="250" text="Login" />
+<Hyperlink id="forgot-password" text="Forgot Password?" />
+<opaqueInsets>
+<Insets />
+</opaqueInsets>
+</VBox>
+</StackPane>
