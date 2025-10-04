@@ -1,75 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
 <?import javafx.geometry.Insets?>
-<?import javafx.geometry.Pos?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="root"
-            xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="HomePageController"
-            stylesheets="@homepage.css">
+<BorderPane fx:id="root" stylesheets="@homepage.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="HomePageController">
 
     <!-- Sidebar -->
     <left>
-        <VBox spacing="10" prefWidth="200" styleClass="sidebar">
+        <VBox prefWidth="200" spacing="10" styleClass="sidebar">
             <padding>
-                <Insets top="20" right="10" bottom="20" left="10" />
+                <Insets bottom="20" left="10" right="10" top="20" />
             </padding>
 
-            <Label text="Current Repository" styleClass="sidebar-title" />
-            <Label fx:id="repoNameLabel" text="my-project" styleClass="repo-name" />
+            <Label styleClass="sidebar-title" text="Current Repository" />
+            <Label fx:id="repoNameLabel" styleClass="repo-name" text="my-project" />
 
             <Separator />
 
-            <Button text="Existing" onAction="#handleOpenRepo" styleClass="sidebar-btn" />
-            <Button text="History" onAction="#handleViewHistory" styleClass="sidebar-btn" />
-            <Button text="Settings" onAction="#handleSettings" styleClass="sidebar-btn" />
+            <Button onAction="#handleOpenRepo" styleClass="sidebar-btn" text="Existing" />
+            <Button onAction="#handleViewHistory" styleClass="sidebar-btn" text="History" />
+            <Button onAction="#handleSettings" styleClass="sidebar-btn" text="Settings" />
 
             <Separator />
 
-            <Label text="Files" styleClass="sidebar-subtitle" />
+            <Label styleClass="sidebar-subtitle" text="Files" />
             <ListView fx:id="fileListView" VBox.vgrow="ALWAYS" />
         </VBox>
     </left>
 
     <!-- Main Content Area -->
     <center>
-        <VBox spacing="15" alignment="TOP_LEFT">
+        <VBox alignment="TOP_LEFT" spacing="15">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20" />
+                <Insets bottom="20" left="20" right="20" top="20" />
             </padding>
 
-            <Label text="My Project" styleClass="main-title" />
-            <Label text="Track, commit, and roll back your Word document versions."
-                   styleClass="subtitle" />
+            <Label styleClass="main-title" text="My Project" />
+            <Label styleClass="subtitle" text="Track, commit, and roll back your Word document versions." />
 
             <Separator />
 
             <!-- Commit Section -->
             <VBox spacing="10">
-                <Label text="Commit Changes" styleClass="section-title" />
+                <Label styleClass="section-title" text="Commit Changes" />
                 <TextField fx:id="commitTitleField" promptText="Commit title" />
-                <TextArea fx:id="commitDescriptionField"
-                          promptText="Add a detailed description of your changes."
-                          prefRowCount="3" />
-                <Button text="Commit" onAction="#handleCommit" styleClass="commit-btn" />
+                <TextArea fx:id="commitDescriptionField" prefRowCount="3" promptText="Add a detailed description of your changes." />
+                <Button onAction="#handleCommit" styleClass="commit-btn" text="Commit" />
             </VBox>
         </VBox>
     </center>
 
     <!-- Right History Panel -->
     <right>
-        <VBox spacing="10" prefWidth="260" styleClass="history-panel">
+        <VBox prefWidth="260" spacing="10" styleClass="history-panel">
             <padding>
-                <Insets top="20" right="20" bottom="20" left="20" />
+                <Insets bottom="20" left="20" right="20" top="20" />
             </padding>
 
             <HBox alignment="CENTER_LEFT" spacing="10">
-                <Label text="History" styleClass="section-title" />
-                <Button text="Fetch Origin" onAction="#handleFetch" styleClass="fetch-btn" />
+                <Label styleClass="section-title" text="History" />
+                <Button onAction="#handleFetch" styleClass="fetch-btn" text="Fetch Origin" />
             </HBox>
 
             <ListView fx:id="historyListView" VBox.vgrow="ALWAYS" />
