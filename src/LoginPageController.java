@@ -34,7 +34,7 @@ public class LoginPageController {
     private void handleLoginButtonAction(ActionEvent event) {
         try {
             // 1. Load the FXML for the Home page
-            Parent homePageRoot = FXMLLoader.load(getClass().getResource("HomePAge.FXML"));
+            Parent homePageRoot = FXMLLoader.load(getClass().getResource("HomePage.FXML"));
             
             // 2. Get the current Stage object from the button that was clicked
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();

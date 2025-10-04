@@ -1,20 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
-
-<?import javafx.scene.layout.VBox?>
-
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.geometry.Pos?>
+<BorderPane fx:id="root"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="HomePageController"
+            stylesheets="@homepage.css">
 
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="https://www.google.com/search?q=http://javafx.com/javafx/21">
-<children>
-<Label text="Welcome to the Home Page!">
-<font>
-<Font name="System Bold" size="24.0" />
-</font>
-</Label>
-<Label text="You have successfully logged in." />
-</children>
-</VBox>
+    <!-- Sidebar -->
+    <left>
+        <VBox spacing="10" prefWidth="200" styleClass="sidebar">
+            <padding>
+                <Insets top="20" right="10" bottom="20" left="10" />
+            </padding>
+
+            <Label text="Current Repository" styleClass="sidebar-title" />
+            <Label fx:id="repoNameLabel" text="my-project" styleClass="repo-name" />
+
+            <Separator />
+
+            <Button text="Existing" onAction="#handleOpenRepo" styleClass="sidebar-btn" />
+            <Button text="History" onAction="#handleViewHistory" styleClass="sidebar-btn" />
+            <Button text="Settings" onAction="#handleSettings" styleClass="sidebar-btn" />
+
+            <Separator />
+
+            <Label text="Files" styleClass="sidebar-subtitle" />
+            <ListView fx:id="fileListView" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </left>
+
+    <!-- Main Content Area -->
+    <center>
+        <VBox spacing="15" alignment="TOP_LEFT">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>
+
+            <Label text="My Project" styleClass="main-title" />
+            <Label text="Track, commit, and roll back your Word document versions."
+                   styleClass="subtitle" />
+
+            <Separator />
+
+            <!-- Commit Section -->
+            <VBox spacing="10">
+                <Label text="Commit Changes" styleClass="section-title" />
+                <TextField fx:id="commitTitleField" promptText="Commit title" />
+                <TextArea fx:id="commitDescriptionField"
+                          promptText="Add a detailed description of your changes."
+                          prefRowCount="3" />
+                <Button text="Commit" onAction="#handleCommit" styleClass="commit-btn" />
+            </VBox>
+        </VBox>
+    </center>
+
+    <!-- Right History Panel -->
+    <right>
+        <VBox spacing="10" prefWidth="260" styleClass="history-panel">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20" />
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="History" styleClass="section-title" />
+                <Button text="Fetch Origin" onAction="#handleFetch" styleClass="fetch-btn" />
+            </HBox>
+
+            <ListView fx:id="historyListView" VBox.vgrow="ALWAYS" />
+        </VBox>
+    </right>
+
+</BorderPane>
