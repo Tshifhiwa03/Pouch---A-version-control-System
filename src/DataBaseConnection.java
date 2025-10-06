@@ -6,8 +6,8 @@ public class DataBaseConnection {
 
     public Connection getConnection() {
         String databaseName = "softwareprogramming";
-        String databaseUser = "root"; // your MySQL username
-        String dataPassword = "GhRyawbU@6"; // your MySQL password
+        String databaseUser = "root";
+        String dataPassword = "GhRyawbU@6";
         String url = "jdbc:mysql://localhost:3306/" + databaseName + "?useSSL=false";
 
         try {
