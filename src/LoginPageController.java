@@ -10,16 +10,12 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import javafx.scene.control.Alert;
-
 /**
  * Controller for the LoginPage.FXML.
  * Handles the login button action and transitions to the Home page.
  */
 public class LoginPageController {
+
     // FXML fields for input and button (optional, but good practice)
     @FXML
     private TextField usernameField;
@@ -27,64 +23,35 @@ public class LoginPageController {
     private PasswordField passwordField;
     @FXML
     private Button loginButton;
+
     /**
      * Handles the action when the Login button is clicked.
-     * In a real application, this is where you would validate credentials.
-     * For this example, it immediately switches to the Home page.
+     * This method loads the Home.FXML file and sets it as the new scene 
+     * on the current stage (window).
      * @param event The ActionEvent triggered by the button click.
      */
     @FXML
     private void handleLoginButtonAction(ActionEvent event) {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
-        if (authenticateUser(username, password)) {
         try {
-            // 1. Load the FXML for the Home page
-            Parent homePageRoot = FXMLLoader.load(getClass().getResource("HomePage.fxml"));
+            // 1. Load the FXML for the Home page (assuming you have a file named Home.FXML)
+            Parent homePageRoot = FXMLLoader.load(getClass().getResource("HomePage.FXML"));
+            
             // 2. Get the current Stage object from the button that was clicked
+            // This is the window that currently holds the Login screen.
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            
             // 3. Create a new Scene for the Home page
             Scene homeScene = new Scene(homePageRoot);
+            
             // 4. Set the new Scene and update the stage title
             stage.setScene(homeScene);
             stage.setTitle("Home Page");
             stage.show();
+            
         } catch (IOException e) {
-            // Handle the error if Home.FXML can't be found or loaded
-            System.err.println("Failed to load Home.FXML.");
+            // Print an error if Home.FXML can't be found or loaded
+            System.err.println("Failed to load Home.FXML. Make sure the file exists in your project resources.");
             e.printStackTrace();
         }
     }
-       else {
-            showAlert("Login Failed", "Invalid username or password.");
-        } 
-    }
-     private boolean authenticateUser(String username, String password) {
-        String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
-
-        try (Connection conn = new DataBaseConnection().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-
-            ResultSet rs = stmt.executeQuery();
-            return rs.next(); // true if a match is found
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    /**
-     * Displays an alert dialog with a given title and message.
-     */
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-    
 }
