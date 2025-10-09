@@ -1,113 +1,146 @@
 package pouchvcs;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
- */
-
-import java.net.URL;
-import java.util.ResourceBundle;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import pouchvcs.model.User;
+import pouchvcs.service.PouchVCS;
+
 import java.io.File;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
 
 /**
- * FXML Controller class for the Home Page of the Version Control System
- *
- * @author tshif
+ * Controller for the HomePage.FXML. Handles all core VCS operations:
+ * init, add, commit, checkout, and displaying history/status.
  */
-public class HomePageController implements Initializable {
+public class HomePageController {
 
-    // Example UI elements that match your FXML IDs
+    // --- UI Elements ---
+    @FXML private Label welcomeLabel;
+    @FXML private Label currentDirectoryLabel;
+    @FXML private TextArea statusTextArea;
+    @FXML private ListView<String> historyListView;
+    @FXML private TextField commitMessageField;
+
+    // --- Services and State ---
+    private User currentUser;
+    private final PouchVCS pouchVCS = new PouchVCS();
+    private Path workingDirectory; // Represents the local folder being tracked
+
+    /**
+     * Initializes the controller. Called after FXML elements are loaded.
+     */
     @FXML
-    private ListView<String> fileListView;
+    public void initialize() {
+        // Default to the user's home directory until a project is selected
+        workingDirectory = Paths.get(System.getProperty("user.home"), "PouchProjects");
+        updateWorkingDirectoryLabel(workingDirectory);
 
-    @FXML
-    private ListView<String> historyListView;
+        // Ensure the base project directory exists
+        if (!workingDirectory.toFile().exists()) {
+            workingDirectory.toFile().mkdirs();
+        }
 
-    @FXML
-    private TextField commitTitleField;
-
-    @FXML
-    private TextArea commitDescriptionField;
-
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
-        // Initialization logic when the scene loads
-        System.out.println("Home Page initialized!");
-    }
-
-    // =========================
-    // EVENT HANDLERS
-    // =========================
-
-    @FXML
-    private void handleOpenRepo(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Repository Folder");
-        File selectedFile = fileChooser.showOpenDialog(new Stage());
-
-        if (selectedFile != null) {
-            System.out.println("Opened repository: " + selectedFile.getAbsolutePath());
-            showAlert("Repository Opened", "Opened repository: " + selectedFile.getName());
+        // Check if a Pouch repo already exists in this default directory
+        try {
+            if (pouchVCS.isInitialized(workingDirectory)) {
+                appendStatus("Repository found. Ready for operations.");
+                updateHistory();
+            } else {
+                appendStatus("No Pouch repository found. Use 'Init Repository' to start.");
+            }
+        } catch (Exception e) {
+            appendError("Initialization check failed: " + e.getMessage());
         }
     }
 
+    /**
+     * Sets the logged-in user and updates the welcome label.
+     * Called by LoginPageController after successful login.
+     * @param user The authenticated user object.
+     */
+    public void setUser(User user) {
+        this.currentUser = user;
+        welcomeLabel.setText("Welcome, " + user.getUsername() + "!");
+    }
+
+    // --- VCS Actions ---
+
+    /**
+     * Handles the "Initialize Repository" button action.
+     */
     @FXML
-    private void handleViewHistory(ActionEvent event) {
-        System.out.println("View History clicked");
-        historyListView.getItems().clear();
-        historyListView.getItems().addAll(
-                "Commit 1 - Initial project setup",
-                "Commit 2 - Added new feature",
-                "Commit 3 - Bug fixes and cleanup"
+    private void handleInitRepository() {
+        try {
+            pouchVCS.init(workingDirectory);
+            appendStatus("Successfully initialized Pouch repository in: " + workingDirectory.toString());
+            updateHistory();
+        } catch (Exception e) {
+            appendError("Failed to initialize repository: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Handles the "Add File" button action. Opens a file chooser.
+     */
+    @FXML
+    private void handleAddFile() {
+        if (!checkVCSReady()) return;
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select Word Document (.docx) to Add");
+        fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Word Documents", "*.docx")
         );
-        showAlert("History Loaded", "Commit history loaded successfully.");
+
+        File file = fileChooser.showOpenDialog(new Stage());
+        if (file != null) {
+            try {
+                // Ensure the file path is relative to the working directory
+                Path relativePath = workingDirectory.relativize(file.toPath());
+                pouchVCS.addFile(file.toPath());
+                appendStatus("Added file to staging: " + relativePath.toString());
+                // In a real app, you'd update a 'Staging' view here
+            } catch (Exception e) {
+                appendError("Failed to add file: " + e.getMessage());
+            }
+        }
     }
 
+    /**
+     * Handles the "Commit Changes" button action.
+     */
     @FXML
-    private void handleSettings(ActionEvent event) {
-        System.out.println("Settings clicked");
-        showAlert("Settings", "Settings page under development!");
-    }
+    private void handleCommit() {
+        if (!checkVCSReady()) return;
 
-    @FXML
-    private void handleCommit(ActionEvent event) {
-        String title = commitTitleField.getText();
-        String description = commitDescriptionField.getText();
-
-        if (title.isEmpty()) {
-            showAlert("Error", "Please enter a commit title.");
+        String message = commitMessageField.getText().trim();
+        if (message.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Missing Message", "Please enter a commit message.");
             return;
         }
 
-        System.out.println("Commit: " + title + " — " + description);
-        historyListView.getItems().add(0, "New Commit: " + title);
-        showAlert("Commit Successful", "Changes committed successfully!");
+        try {
+            String commitHash = pouchVCS.commit(workingDirectory, currentUser.getUsername(), message);
+            appendStatus("New commit created: " + commitHash);
+            commitMessageField.clear();
+            updateHistory();
+        } catch (Exception e) {
+            appendError("Commit failed: " + e.getMessage());
+        }
     }
 
+    /**
+     * Handles the "Checkout Version" action from the history list.
+     */
     @FXML
-    private void handleFetch(ActionEvent event) {
-        System.out.println("Fetch Origin clicked");
-        showAlert("Fetch", "Fetching updates from remote repository...");
-    }
+    private void handleCheckout() {
+        String selectedCommit = historyListView.getSelectionModel().getSelectedItem();
 
-    // =========================
-    // HELPER METHOD
-    // =========================
-    private void showAlert(String title, String message) {
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-}
+        if (selectedCommit == null || !checkVCSReady()) {
+            showAlert(Alert.AlertType.WARNING, "No Selection", "Please select a commit from the history list to check out.");
