@@ -24,7 +24,7 @@
 
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="rootPane" stylesheets="@loginpage.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="pouchvcs.LoginPageController">
+<StackPane fx:id="rootPane" stylesheets="@loginpage.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="PouchUI.LoginPageController">
 <VBox id="login-box" alignment="CENTER" spacing="20">
 <Label id="logo-text" text="CodeCub">
 <font>
