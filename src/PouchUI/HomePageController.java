@@ -79,27 +79,29 @@ public class HomePageController implements Initializable {
         showAlert("Settings", "Settings page under development!");
     }
 
-    @FXML
-    private void handleCommit(ActionEvent event) {
-        String title = commitTitleField.getText();
-        String description = commitDescriptionField.getText();
+   @FXML
+private void handleCommit(ActionEvent event) {
+    String title = commitTitleField.getText().trim();
+    String description = commitDescriptionField.getText().trim();
 
-        if (title.isEmpty()) {
-            showAlert("Error", "Please enter a commit title.");
-            return;
-        }
-
-        System.out.println("Commit: " + title + " — " + description);
-        historyListView.getItems().add(0, "New Commit: " + title);
-        showAlert("Commit Successful", "Changes committed successfully!");
+    if (title.isEmpty()) {
+        showAlert("Error", "Please enter a commit title.");
+        return;
     }
-
+    // Format the commit entry
+    String formattedCommit = "🔹 " + title + "\n   ↪ " + description;
+    // Add to the top of the history list
+    historyListView.getItems().add(0, formattedCommit);
+    // Clear input fields after commit
+    commitTitleField.clear();
+    commitDescriptionField.clear();
+    showAlert("Commit Successful", "Your changes have been committed and added to history.");
+}
     @FXML
     private void handleFetch(ActionEvent event) {
         System.out.println("Fetch Origin clicked");
         showAlert("Fetch", "Fetching updates from remote repository...");
     }
-
     // =========================
     // HELPER METHOD
     // =========================
