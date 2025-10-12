@@ -1,10 +1,5 @@
 package PouchUI;
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
- */
-
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -18,15 +13,13 @@ import javafx.stage.Stage;
 import java.io.File;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
-/**
- * FXML Controller class for the Home Page of the Version Control System
- *
- * @author tshif
- */
 public class HomePageController implements Initializable {
 
-    // Example UI elements that match your FXML IDs
     @FXML
     private ListView<String> fileListView;
 
@@ -39,10 +32,16 @@ public class HomePageController implements Initializable {
     @FXML
     private TextArea commitDescriptionField;
 
+    // Centralized history log for all actions
+    private final ObservableList<String> historyLog = FXCollections.observableArrayList();
+
+    // Separate list to store committed changes
+    private final ObservableList<String> committedChanges = FXCollections.observableArrayList();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        // Initialization logic when the scene loads
         System.out.println("Home Page initialized!");
+        logAction("App initialized");
     }
 
     // =========================
@@ -56,8 +55,10 @@ public class HomePageController implements Initializable {
         File selectedFile = fileChooser.showOpenDialog(new Stage());
 
         if (selectedFile != null) {
+            String repoName = selectedFile.getName();
             System.out.println("Opened repository: " + selectedFile.getAbsolutePath());
-            showAlert("Repository Opened", "Opened repository: " + selectedFile.getName());
+            showAlert("Repository Opened", "Opened repository: " + repoName);
+            logAction("Repository opened: " + repoName);
         }
     }
 
@@ -65,21 +66,18 @@ public class HomePageController implements Initializable {
     private void handleViewHistory(ActionEvent event) {
         System.out.println("View History clicked");
         historyListView.getItems().clear();
-        historyListView.getItems().addAll(
-                "Commit 1 - Initial project setup",
-                "Commit 2 - Added new feature",
-                "Commit 3 - Bug fixes and cleanup"
-        );
-        showAlert("History Loaded", "Commit history loaded successfully.");
+        historyListView.getItems().addAll(historyLog);
+        showAlert("History Loaded", "Full activity history loaded successfully.");
     }
 
     @FXML
     private void handleSettings(ActionEvent event) {
         System.out.println("Settings clicked");
         showAlert("Settings", "Settings page under development!");
+        logAction("⚙ Accessed settings");
     }
 
-   @FXML
+    @FXML
 private void handleCommit(ActionEvent event) {
     String title = commitTitleField.getText().trim();
     String description = commitDescriptionField.getText().trim();
@@ -89,27 +87,53 @@ private void handleCommit(ActionEvent event) {
         return;
     }
     // Format the commit entry
-    String formattedCommit = "🔹 " + title + "\n   ↪ " + description;
-    // Add to the top of the history list
-    historyListView.getItems().add(0, formattedCommit);
-    // Clear input fields after commit
+    String formattedCommit = "🔹 " + title + "\n ↪ " + description;
+    // Log the commit to history
+    logAction("Commit made: " + title);
+    // Store the commit separately for fetch display
+    committedChanges.add(0, formattedCommit);
+    // ✅ Immediately update the fetch panel
+    historyListView.getItems().clear();
+    historyListView.getItems().addAll(committedChanges);
+    // Clear input fields
     commitTitleField.clear();
     commitDescriptionField.clear();
-    showAlert("Commit Successful", "Your changes have been committed and added to history.");
+
+    showAlert("Commit Successful", "Your changes have been committed.");
 }
+
+
     @FXML
     private void handleFetch(ActionEvent event) {
         System.out.println("Fetch Origin clicked");
         showAlert("Fetch", "Fetching updates from remote repository...");
+
+        // Log the fetch action
+        logAction("Fetched updates from remote repository");
+
+        // Display commits in the fetch panel (historyListView)
+        historyListView.getItems().clear();
+        historyListView.getItems().addAll(committedChanges);
     }
+
     // =========================
-    // HELPER METHOD
+    // HELPER METHODS
     // =========================
+
     private void showAlert(String title, String message) {
         Alert alert = new Alert(AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    private void logAction(String action) {
+        historyLog.add(0, timestamped(action));
+    }
+
+    private String timestamped(String action) {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        return "[" + timestamp + "] " + action;
     }
 }
