@@ -62,7 +62,35 @@ public class LoginPageController {
             showAlert("Login Failed", "Invalid username or password.");
         } 
     }
-     private boolean authenticateUser(String username, String password) {
+    
+    private boolean authenticateUser(String username, String password) {
+    String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
+
+    DataBaseConnection dbConn = new DataBaseConnection();
+
+    try {
+        // Connect to first database
+        Connection conn1 = dbConn.getConnection("users", "root", "DrTnet@170621");
+        PreparedStatement stmt1 = conn1.prepareStatement(query);
+        stmt1.setString(1, username);
+        stmt1.setString(2, password);
+        ResultSet rs1 = stmt1.executeQuery();
+        if (rs1.next()) return true; // found in first DB
+
+        // Connect to second database
+        Connection conn2 = dbConn.getConnection("softwareprogramming", "root", "GhRyawbU@6");
+        PreparedStatement stmt2 = conn2.prepareStatement(query);
+        stmt2.setString(1, username);
+        stmt2.setString(2, password);
+        ResultSet rs2 = stmt2.executeQuery();
+        return rs2.next(); // true if found in second DB
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+     /*private boolean authenticateUser(String username, String password) {
         String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
 
         try (Connection conn = new DataBaseConnection().getConnection();
@@ -77,7 +105,7 @@ public class LoginPageController {
             e.printStackTrace();
             return false;
         }
-    }
+    }*/
 
     /**
      * Displays an alert dialog with a given title and message.
