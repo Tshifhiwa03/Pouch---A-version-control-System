@@ -310,15 +310,60 @@ private void handlePreviewChanges(ActionEvent event) {
     }
 }
 
+@FXML
+private void handleDeleteProject(ActionEvent event) {
+    if (currentProject.isEmpty()) {
+        showAlert("Error", "No project selected to delete.");
+        return;
+    }
+
+    Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+    confirmAlert.setTitle("Delete Project");
+    confirmAlert.setHeaderText("Are you sure you want to delete project: " + currentProject + "?");
+    confirmAlert.setContentText("This action cannot be undone.");
+    Optional<ButtonType> result = confirmAlert.showAndWait();
+
+    if (result.isPresent() && result.get() == ButtonType.OK) {
+        // Delete project folder
+        File projectFolder = new File(Clone.targetFolderPath, ".clone_" + currentProject);
+        if (projectFolder.exists()) {
+            Clone.deleteDirectory(projectFolder);
+        }
+
+        // Remove from ComboBox & map
+        projectsComboBox.getItems().remove(currentProject);
+        projectFilesMap.remove(currentProject);
+        currentProject = "";
+        fileListView.getItems().clear();
+        historyListView.getItems().clear();
+        centerTitleLabel.setText("Select a project");
+        centerSubtitleLabel.setText("Project deleted successfully!");
+    }
+}
     // ========================= Helpers ===========================
 
     private void switchToProject(String projectName) {
-        currentProject = projectName;
-        refreshFileListView();
-        centerTitleLabel.setText("Project: " + projectName);
-        centerSubtitleLabel.setText("Switched to project: " + projectName);
-        logAction("Switched to project: " + projectName);
+    if (hasUnsavedChanges()) {
+        Alert unsavedAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        unsavedAlert.setTitle("Unsaved Changes");
+        unsavedAlert.setHeaderText("You have unsaved changes!");
+        unsavedAlert.setContentText("Do you want to continue without saving?");
+        Optional<ButtonType> result = unsavedAlert.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) return;
     }
+
+    currentProject = projectName;
+    refreshFileListView();
+    refreshFileSelectionList();
+    centerTitleLabel.setText("Project: " + projectName);
+    centerSubtitleLabel.setText("Switched to project: " + projectName);
+    logAction("Switched to project: " + projectName);
+}
+
+private boolean hasUnsavedChanges() {
+    return !commitTitleField.getText().trim().isEmpty() || !commitDescriptionField.getText().trim().isEmpty();
+}
+
 
     private void refreshFileListView() {
         fileListView.getItems().clear();
@@ -393,22 +438,6 @@ private void handlePreviewChanges(ActionEvent event) {
     committedChanges.add(0, sb.toString());
     historyListView.getItems().setAll(committedChanges);
 }
-
-    
-   /*private void addCommitToHistory(String title, String hash, String description, ArrayList<FileMeta> files) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("🔹 ").append(title).append(" [").append(hash).append("]\n ↪ ").append(description);
-
-    if (!files.isEmpty()) {
-        sb.append("\n   Files:");
-        for (FileMeta f : files) {
-            sb.append("\n   • ").append(f.getFilePath());
-        }
-    }
-
-    committedChanges.add(0, sb.toString());
-    historyListView.getItems().setAll(committedChanges);
-}*/
    
    private void showDiffDialog(File file) throws IOException {
     if (!file.exists()) {
@@ -434,4 +463,6 @@ private void handlePreviewChanges(ActionEvent event) {
     diffAlert.getDialogPane().setContent(diffArea);
     diffAlert.showAndWait();
 }
+   
+   
 }

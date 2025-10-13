@@ -69,6 +69,7 @@
                     <HBox spacing="8">
                         <Button onAction="#handleViewHistory" text="View History" />
                         <Button onAction="#handleRollback" text="Rollback" />
+                        <Button onAction="#handleDeleteProject" text="Delete Project" />
                     </HBox>
                 </VBox>
             </HBox>

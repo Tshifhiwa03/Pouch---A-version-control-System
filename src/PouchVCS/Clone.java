@@ -223,13 +223,24 @@ public static void initializeNewClone() throws IOException {
     currentFileList.clear(); // make sure list is empty
 }
 
-public static void deleteDirectory(File dir) {
-    if (dir.isDirectory()) {
-        for (File file : dir.listFiles()) {
-            deleteDirectory(file);
+public static void deleteDirectory(File dir) throws IOException {
+    if (dir == null || !dir.exists()) return;
+
+    try {
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteDirectory(file);
+                }
+            }
         }
+        if (!dir.delete()) {
+            throw new IOException("Failed to delete: " + dir.getAbsolutePath());
+        }
+    } catch (Exception e) {
+        throw new IOException("Error while deleting directory: " + dir.getAbsolutePath(), e);
     }
-    dir.delete();
 }
 
 
@@ -538,7 +549,7 @@ public static void deleteDirectory(File dir) {
             oos.close();
         }
     }
-
+    
     private static void cloneIntroduction() {
         System.out.println("  _   _      _ _\n" +
                 " | | | | ___| | | ___\n" +
