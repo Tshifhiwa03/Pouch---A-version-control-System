@@ -10,13 +10,12 @@ import java.sql.SQLException;
  */
 public class DataBaseConnection {
 
-    // Optional: MySQL driver name
+    // MySQL JDBC driver
     private static final String DRIVER = "com.mysql.cj.jdbc.Driver";
 
     public DataBaseConnection() {
         try {
-            // Load the MySQL JDBC driver
-            Class.forName(DRIVER);
+            Class.forName(DRIVER); // Load JDBC driver
         } catch (ClassNotFoundException e) {
             System.err.println("MySQL JDBC Driver not found.");
             e.printStackTrace();
@@ -33,18 +32,22 @@ public class DataBaseConnection {
      * @throws SQLException if connection fails
      */
     public Connection getConnection(String databaseName, String user, String password) throws SQLException {
-        String url = "jdbc:mysql://localhost:3306/" + databaseName + "?useSSL=false&allowPublicKeyRetrieval=true";
+        String url = "jdbc:mysql://localhost:3306/" + databaseName +
+                     "?useSSL=false&allowPublicKeyRetrieval=true";
         return DriverManager.getConnection(url, user, password);
     }
 
     /**
-     * Example convenience methods if you always use certain databases:
+     * Convenience method for connecting to the 'users' database.
      */
     public Connection getUsersDatabaseConnection() throws SQLException {
         return getConnection("users", "root", "DrTnet@170621");
     }
 
+    /**
+     * Convenience method for connecting to the 'softwareprogramming' database.
+     */
     public Connection getSoftwareProgrammingDatabaseConnection() throws SQLException {
         return getConnection("softwareprogramming", "root", "GhRyawbU@6");
-    }
+    } 
 }

@@ -66,6 +66,41 @@ public class LoginPageController {
     private boolean authenticateUser(String username, String password) {
     String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
 
+    String[][] dbs = {
+        {"users", "root", "DrTnet@170621"},
+        {"softwareprogramming", "root", "GhRyawbU@6"}
+    };
+
+    DataBaseConnection dbConn = new DataBaseConnection();
+
+    for (String[] dbInfo : dbs) {
+        String dbName = dbInfo[0];
+        String dbUser = dbInfo[1];
+        String dbPass = dbInfo[2];
+
+        try (Connection conn = dbConn.getConnection(dbName, dbUser, dbPass);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+             
+            stmt.setString(1, username);
+            stmt.setString(2, password);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error authenticating on database: " + dbName);
+            e.printStackTrace();
+            // Could optionally continue trying next db or return false here
+        }
+    }
+    return false;
+}
+
+   /* private boolean authenticateUser(String username, String password) {
+    String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
+
     DataBaseConnection dbConn = new DataBaseConnection();
 
     try {
@@ -89,7 +124,7 @@ public class LoginPageController {
         e.printStackTrace();
         return false;
     }
-}
+}*/
      /*private boolean authenticateUser(String username, String password) {
         String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
 
