@@ -193,7 +193,7 @@ public static void detectCloneFolder() {
     mainRepoPath = targetFolderPath + "/.clone/";
 }
 
-private static void start(String repoName) throws IOException {
+public static void start(String repoName) throws IOException {
     String[] ignorePaths = {"", "clones", "clones/filedata", "madedata", ".ignoreclone"};
     for (String ignorePath : ignorePaths) {
         File fileRef = new File(mainRepoPath + ignorePath);
@@ -211,7 +211,19 @@ private static void start(String repoName) throws IOException {
     writeFileContent(repoNamePath, repoName.getBytes());
     }
 
-private static void deleteDirectory(File dir) {
+public static void initializeNewClone() throws IOException {
+    File cloneFolder = new File(targetFolderPath, ".clone_");
+    if (!cloneFolder.exists()) {
+        if (!cloneFolder.mkdir()) {
+            throw new IOException("Cannot create .clone_ folder in: " + targetFolderPath);
+        }
+    }
+
+    // Optionally, initialize any other files your CLI clone created
+    currentFileList.clear(); // make sure list is empty
+}
+
+public static void deleteDirectory(File dir) {
     if (dir.isDirectory()) {
         for (File file : dir.listFiles()) {
             deleteDirectory(file);

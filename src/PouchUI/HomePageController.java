@@ -28,6 +28,17 @@ import java.nio.file.Path;
 import java.util.ArrayList;          // for ArrayList
 import java.io.FileOutputStream;      // for saving commit files
 import java.io.ObjectOutputStream;    // for serializing CloneUnit
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
+import java.util.Optional;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
 
 public class HomePageController implements Initializable {
 
@@ -42,6 +53,12 @@ public class HomePageController implements Initializable {
 
     @FXML
     private TextArea commitDescriptionField;
+    @FXML
+    private ComboBox<String> projectsComboBox;
+    @FXML
+    private Label centerTitleLabel;
+    @FXML
+    private Label centerSubtitleLabel;
 
     // Centralized history log for all actions
     private final ObservableList<String> historyLog = FXCollections.observableArrayList();
@@ -54,10 +71,6 @@ public class HomePageController implements Initializable {
         System.out.println("Home Page initialized!");
         logAction("App initialized");
     }
-
-    // =========================
-    // EVENT HANDLERS
-    // =========================
 
     @FXML
 private void handleOpenRepo(ActionEvent event) {
@@ -109,7 +122,7 @@ private void handleOpenRepo(ActionEvent event) {
     }
 
     @FXML
-private void handleCommit(ActionEvent event) {
+    private void handleCommit(ActionEvent event) {
     String title = commitTitleField.getText().trim();
     String description = commitDescriptionField.getText().trim();
 
@@ -157,30 +170,6 @@ private void handleCommit(ActionEvent event) {
     showAlert("Commit Successful", "Your changes have been committed!");
 }
 
-/*private void handleCommit(ActionEvent event) {
-    String title = commitTitleField.getText().trim();
-    String description = commitDescriptionField.getText().trim();
-
-    if (title.isEmpty()) {
-        showAlert("Error", "Please enter a commit title.");
-        return;
-    }
-    // Format the commit entry
-    String formattedCommit = "🔹 " + title + "\n ↪ " + description;
-    // Log the commit to history
-    logAction("Commit made: " + title);
-    // Store the commit separately for fetch display
-    committedChanges.add(0, formattedCommit);
-    // ✅ Immediately update the fetch panel
-    historyListView.getItems().clear();
-    historyListView.getItems().addAll(committedChanges);
-    // Clear input fields
-    commitTitleField.clear();
-    commitDescriptionField.clear();
-
-    showAlert("Commit Successful", "Your changes have been committed.");
-}*/
-
     @FXML
     private void handleFetch(ActionEvent event) {
         System.out.println("Fetch Origin clicked");
@@ -210,4 +199,119 @@ private void handleCommit(ActionEvent event) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         return "[" + timestamp + "] " + action;
     }
+    
+@FXML
+private void handleOpenSelectedProject(ActionEvent event) {
+    // 1️⃣ Ask the user to select the parent folder
+    DirectoryChooser dirChooser = new DirectoryChooser();
+    dirChooser.setTitle("Select Folder to Create New Project");
+    File selectedFolder = dirChooser.showDialog(new Stage());
+
+    if (selectedFolder != null) {
+        // 2️⃣ Ask the user for a project name
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("New Project");
+        dialog.setHeaderText("Enter a name for your new project");
+        dialog.setContentText("Project name:");
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent() && !result.get().trim().isEmpty()) {
+            String projectName = result.get().trim();
+
+            // 3️⃣ Create the new .clone_<projectName> folder
+            File cloneFolder = new File(selectedFolder, ".clone_" + projectName);
+            if (!cloneFolder.exists()) {
+                if (!cloneFolder.mkdir()) {
+                    showAlert("Error", "Failed to create project folder.");
+                    return;
+                }
+            }
+
+            // 4️⃣ Set backend tracking
+            Clone.targetFolderPath = cloneFolder.getAbsolutePath();
+            try {
+                Clone.initializeNewClone(); // initialize empty project
+            } catch (IOException e) {
+                e.printStackTrace();
+                showAlert("Error", "Failed to initialize new project: " + e.getMessage());
+                return;
+            }
+
+            // 5️⃣ Update GUI
+            fileListView.getItems().clear();
+            centerTitleLabel.setText("Project: " + projectName);
+            centerSubtitleLabel.setText("New project initialized successfully!");
+            showAlert("Project Created", "New project created at: " + cloneFolder.getAbsolutePath());
+
+            // 6️⃣ Add project to the Projects dropdown
+            ObservableList<String> projects = projectsComboBox.getItems();
+            projects.add(projectName);
+            projectsComboBox.setValue(projectName); // select the new project
+        }
+    }
 }
+
+@FXML
+private void handleNewProjectButton(ActionEvent event) {
+    // 1️⃣ Select parent folder
+    DirectoryChooser dirChooser = new DirectoryChooser();
+    dirChooser.setTitle("Select folder to create new project");
+    File parentFolder = dirChooser.showDialog(new Stage());
+
+    if (parentFolder == null) return;
+
+    // 2️⃣ Ask for project name
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("New Project");
+    dialog.setHeaderText("Enter a name for your new project");
+    dialog.setContentText("Project name:");
+
+    Optional<String> result = dialog.showAndWait();
+    if (result.isEmpty() || result.get().trim().isEmpty()) return;
+
+    String repoName = result.get().trim();
+    File newCloneFolder = new File(parentFolder, ".clone_" + repoName);
+
+    if (newCloneFolder.exists()) {
+        Alert overwriteAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        overwriteAlert.setTitle("Overwrite Project?");
+        overwriteAlert.setHeaderText("A project with this name already exists.");
+        overwriteAlert.setContentText("Do you want to overwrite it?");
+        Optional<ButtonType> answer = overwriteAlert.showAndWait();
+        if (answer.isEmpty() || answer.get() != ButtonType.OK) return;
+        Clone.deleteDirectory(newCloneFolder); // remove existing folder
+    }
+
+    try {
+        Clone.targetFolderPath = parentFolder.getAbsolutePath();
+        Clone.mainRepoPath = newCloneFolder.getAbsolutePath() + "/";
+        newCloneFolder.mkdir();
+        Clone.start(repoName);
+
+        // 3️⃣ Update GUI
+        ObservableList<String> projects = projectsComboBox.getItems();
+        projects.add(repoName);
+        projectsComboBox.setValue(repoName); // select the new project
+
+        centerTitleLabel.setText("Project: " + repoName);
+        centerSubtitleLabel.setText("New project initialized successfully!");
+        fileListView.getItems().clear();
+
+        Alert success = new Alert(Alert.AlertType.INFORMATION);
+        success.setTitle("Project Created");
+        success.setHeaderText("New project created!");
+        success.setContentText("Path: " + newCloneFolder.getAbsolutePath());
+        success.showAndWait();
+
+    } catch (IOException e) {
+        e.printStackTrace();
+        Alert error = new Alert(Alert.AlertType.ERROR);
+        error.setTitle("Error");
+        error.setHeaderText("Failed to create new project");
+        error.setContentText(e.getMessage());
+        error.showAndWait();
+    }
+}
+
+}
+

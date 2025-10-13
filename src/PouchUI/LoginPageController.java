@@ -16,138 +16,104 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javafx.scene.control.Alert;
-import PouchVCS.Clone;
-import PouchVCS.CloneUnit;
-import PouchVCS.FileMeta;
-import PouchVCS.MyFileVisitor;
-
 
 /**
- * Controller for the LoginPage.FXML.
- * Handles the login button action and transitions to the Home page.
+ * Controller for LoginPage.fxml.
+ * Handles user login and navigation to the HomePage.
  */
 public class LoginPageController {
-    // FXML fields for input and button (optional, but good practice)
+
     @FXML
     private TextField usernameField;
+
     @FXML
     private PasswordField passwordField;
+
     @FXML
     private Button loginButton;
+
     /**
-     * Handles the action when the Login button is clicked.
-     * In a real application, this is where you would validate credentials.
-     * For this example, it immediately switches to the Home page.
-     * @param event The ActionEvent triggered by the button click.
+     * Handles login button click event.
      */
     @FXML
     private void handleLoginButtonAction(ActionEvent event) {
-        String username = usernameField.getText();
-        String password = passwordField.getText();
+        String username = usernameField.getText().trim();
+        String password = passwordField.getText().trim();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            showAlert("Input Error", "Please enter both username and password.");
+            return;
+        }
+
         if (authenticateUser(username, password)) {
+            switchToHomePage(event);
+        } else {
+            showAlert("Login Failed", "Invalid username or password.");
+        }
+    }
+
+    /**
+     * Attempts to authenticate the user across multiple databases.
+     */
+    private boolean authenticateUser(String username, String password) {
+        String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
+
+        // List of databases to try
+        String[][] dbConfigs = {
+            {"users", "root", "DrTnet@170621"},
+            {"softwareprogramming", "root", "GhRyawbU@6"},
+            {"logins", "root", "Leandra@mysql24"}
+        };
+
+        DataBaseConnection dbConn = new DataBaseConnection();
+
+        for (String[] config : dbConfigs) {
+            String dbName = config[0];
+            String dbUser = config[1];
+            String dbPass = config[2];
+
+            try (Connection conn = dbConn.getConnection(dbName, dbUser, dbPass);
+                 PreparedStatement stmt = conn.prepareStatement(query)) {
+
+                stmt.setString(1, username);
+                stmt.setString(2, password);
+
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        System.out.println("Authenticated on database: " + dbName);
+                        return true;
+                    }
+                }
+
+            } catch (Exception e) {
+                System.err.println("Database connection/authentication failed for: " + dbName);
+                e.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Navigates to the HomePage scene.
+     */
+    private void switchToHomePage(ActionEvent event) {
         try {
-            // 1. Load the FXML for the Home page
             Parent homePageRoot = FXMLLoader.load(getClass().getResource("HomePage.fxml"));
-            // 2. Get the current Stage object from the button that was clicked
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            // 3. Create a new Scene for the Home page
             Scene homeScene = new Scene(homePageRoot);
-            // 4. Set the new Scene and update the stage title
             stage.setScene(homeScene);
             stage.setTitle("Home Page");
             stage.show();
         } catch (IOException e) {
-            // Handle the error if Home.FXML can't be found or loaded
-            System.err.println("Failed to load Home.FXML.");
+            System.err.println("Failed to load HomePage.fxml.");
             e.printStackTrace();
+            showAlert("Error", "Could not load Home Page.");
         }
     }
-       else {
-            showAlert("Login Failed", "Invalid username or password.");
-        } 
-    }
-    
-    private boolean authenticateUser(String username, String password) {
-    String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
-
-    String[][] dbs = {
-        {"users", "root", "DrTnet@170621"},
-        {"softwareprogramming", "root", "GhRyawbU@6"}
-    };
-
-    DataBaseConnection dbConn = new DataBaseConnection();
-
-    for (String[] dbInfo : dbs) {
-        String dbName = dbInfo[0];
-        String dbUser = dbInfo[1];
-        String dbPass = dbInfo[2];
-
-        try (Connection conn = dbConn.getConnection(dbName, dbUser, dbPass);
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-             
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Error authenticating on database: " + dbName);
-            e.printStackTrace();
-            // Could optionally continue trying next db or return false here
-        }
-    }
-    return false;
-}
-
-   /* private boolean authenticateUser(String username, String password) {
-    String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
-
-    DataBaseConnection dbConn = new DataBaseConnection();
-
-    try {
-        // Connect to first database
-        Connection conn1 = dbConn.getConnection("users", "root", "DrTnet@170621");
-        PreparedStatement stmt1 = conn1.prepareStatement(query);
-        stmt1.setString(1, username);
-        stmt1.setString(2, password);
-        ResultSet rs1 = stmt1.executeQuery();
-        if (rs1.next()) return true; // found in first DB
-
-        // Connect to second database
-        Connection conn2 = dbConn.getConnection("softwareprogramming", "root", "GhRyawbU@6");
-        PreparedStatement stmt2 = conn2.prepareStatement(query);
-        stmt2.setString(1, username);
-        stmt2.setString(2, password);
-        ResultSet rs2 = stmt2.executeQuery();
-        return rs2.next(); // true if found in second DB
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        return false;
-    }
-}*/
-     /*private boolean authenticateUser(String username, String password) {
-        String query = "SELECT * FROM user_account WHERE username = ? AND password = ?";
-
-        try (Connection conn = new DataBaseConnection().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, username);
-            stmt.setString(2, password);
-
-            ResultSet rs = stmt.executeQuery();
-            return rs.next(); // true if a match is found
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }*/
 
     /**
-     * Displays an alert dialog with a given title and message.
+     * Displays an alert with given title and message.
      */
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -156,5 +122,4 @@ public class LoginPageController {
         alert.setContentText(message);
         alert.showAndWait();
     }
-    
 }

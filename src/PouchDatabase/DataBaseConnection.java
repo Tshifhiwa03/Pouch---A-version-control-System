@@ -50,4 +50,8 @@ public class DataBaseConnection {
     public Connection getSoftwareProgrammingDatabaseConnection() throws SQLException {
         return getConnection("softwareprogramming", "root", "GhRyawbU@6");
     } 
+    
+    public Connection getLoginsDatabaseConnection() throws SQLException {
+        return getConnection("logins", "root", "Leandra@mysql24");
+    } 
 }
