@@ -25,12 +25,7 @@ public class Clone {
     public static final String BLUE_COLOR = "\033[34;1m";
     public static final String RED_COLOR = "\033[31;1m";
     public static final String RESET = "\033[0m";
-   /* public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-        targetFolderPath = args[0];
-        mainRepoPath = targetFolderPath + "/.clone/";
-        File folderBase = new File(mainRepoPath);
-        String command = "";*/
-
+  
 public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
     if (args.length == 0) {
         cloneIntroduction(); // shows welcome text
@@ -418,16 +413,31 @@ public static void deleteDirectory(File dir) throws IOException {
         System.out.print(RESET);
     }
 
-    private static void getCurrentFileList()  {
-        String filePath = mainRepoPath + "madedata/currentfilelist.clone";
-        try{
-            currentFileList = (ArrayList<FileMeta>) readFileContent(filePath);
-        } catch (EOFException e) {
-            System.out.println("\n\tNeed to make a clone before save. Execute " + RED_COLOR + "clone make" + RESET + "\n");
+    private static void getCurrentFileList() {
+    String filePath = mainRepoPath + "madedata/currentfilelist.clone";
+    File file = new File(filePath);
+
+    // Create the file if it doesn't exist
+    if (!file.exists()) {
+        try {
+            file.getParentFile().mkdirs(); // Ensure parent directories exist
+            file.createNewFile();
+            currentFileList = new ArrayList<>(); // Initialize empty list
+            writeFileContent(filePath, currentFileList); // Save empty list
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to create currentfilelist.clone", e);
         }
     }
+
+    // Now read the file
+    try {
+        currentFileList = (ArrayList<FileMeta>) readFileContent(filePath);
+    } catch (EOFException e) {
+        currentFileList = new ArrayList<>(); // File exists but is empty
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
 
     private static String generateHashCode() throws IOException, NoSuchAlgorithmException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -450,12 +460,29 @@ public static void deleteDirectory(File dir) throws IOException {
         return hexStringCode.toString();
     }
 
-    private static void takeClones() throws IOException {
-        String filePath = mainRepoPath + "clones/cloneList.clone";
-        try{
-            cloneList = (ArrayList<CloneUnit>) readFileContent(filePath);
-        } catch (EOFException e) {}
+    private static void takeClones() {
+    String filePath = mainRepoPath + "clones/cloneList.clone";
+    File cloneListFile = new File(filePath);
+
+    if (!cloneListFile.exists()) {
+        // Initialize empty clone list
+        cloneList = new ArrayList<>();
+        try {
+            writeFileContent(filePath, cloneList); // Save empty list to file
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return;
     }
+
+    try {
+        cloneList = (ArrayList<CloneUnit>) readFileContent(filePath);
+    } catch (EOFException e) {
+        cloneList = new ArrayList<>(); // Empty file, treat as no commits yet
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
 
     private static void setHeadClone(String headCloneCode) throws IOException {
         String filePath = mainRepoPath + "clones/headhash.clone";

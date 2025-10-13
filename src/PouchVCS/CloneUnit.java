@@ -6,10 +6,20 @@ import java.util.ArrayList;
 public class CloneUnit implements Serializable {
     private ArrayList<FileMeta> fileList;
     private String cloneHashcode;
-    private String title;          // Add this
-    private String description;    // Add this
+    private String title;
+    private String description;
 
-    // New constructor with title and description
+    // Existing constructors
+    public CloneUnit() {
+        this.fileList = new ArrayList<>();
+    }
+
+    public CloneUnit(ArrayList<FileMeta> fileList, String cloneHashcode) {
+        this.fileList = fileList;
+        this.cloneHashcode = cloneHashcode;
+    }
+
+    // ✅ New constructor to include title and description
     public CloneUnit(ArrayList<FileMeta> fileList, String cloneHashcode, String title, String description) {
         this.fileList = fileList;
         this.cloneHashcode = cloneHashcode;
@@ -17,15 +27,7 @@ public class CloneUnit implements Serializable {
         this.description = description;
     }
 
-    // Existing constructor
-    public CloneUnit(ArrayList<FileMeta> fileList, String cloneHashcode) {
-        this.fileList = fileList;
-        this.cloneHashcode = cloneHashcode;
-        this.title = "";
-        this.description = "";
-    }
-
-    // Getter methods
+    // Getters
     public ArrayList<FileMeta> getFileList() {
         return fileList;
     }
@@ -40,5 +42,14 @@ public class CloneUnit implements Serializable {
 
     public String getDescription() {
         return description;
+    }
+
+    // Setters if needed
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
