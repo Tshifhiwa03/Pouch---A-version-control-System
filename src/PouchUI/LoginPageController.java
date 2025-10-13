@@ -92,31 +92,6 @@ public class LoginPageController {
     }
 }
 
-
-        /*for (String[] config : dbConfigs) {
-            String dbName = config[0];
-            String dbUser = config[1];
-            String dbPass = config[2];
-
-            try (Connection conn = dbConn.getConnection(dbName, dbUser, dbPass);
-                 PreparedStatement stmt = conn.prepareStatement(query)) {
-
-                stmt.setString(1, username);
-                stmt.setString(2, password);
-
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        System.out.println("Authenticated on database: " + dbName);
-                        return true;
-                    }
-                }
-
-            } catch (Exception e) {
-                System.err.println("Database connection/authentication failed for: " + dbName);
-                e.printStackTrace();
-            }
-        }*/
-
         return false;
     }
 

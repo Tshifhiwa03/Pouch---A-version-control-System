@@ -134,14 +134,19 @@ public class HomePageController implements Initializable {
         String repoName = result.get().trim();
         File newCloneFolder = new File(parentFolder, ".clone_" + repoName);
         if (newCloneFolder.exists()) {
-            Alert overwriteAlert = new Alert(AlertType.CONFIRMATION);
-            overwriteAlert.setTitle("Overwrite Project?");
-            overwriteAlert.setHeaderText("A project with this name already exists.");
-            overwriteAlert.setContentText("Do you want to overwrite it?");
-            Optional<ButtonType> answer = overwriteAlert.showAndWait();
-            if (answer.isEmpty() || answer.get() != ButtonType.OK) return;
-            Clone.deleteDirectory(newCloneFolder);
-        }
+    Alert overwriteAlert = new Alert(Alert.AlertType.CONFIRMATION);
+    overwriteAlert.setTitle("Overwrite Project?");
+    overwriteAlert.setHeaderText("A project with this name already exists.");
+    overwriteAlert.setContentText("Do you want to overwrite it?");
+    Optional<ButtonType> answer = overwriteAlert.showAndWait();
+    if (answer.isEmpty() || answer.get() != ButtonType.OK) return;
+    try {
+        Clone.deleteDirectory(newCloneFolder);
+    } catch (IOException ex) {
+        showAlert("Error", "Failed to delete existing project: " + ex.getMessage());
+        return;
+    }
+}
 
         try {
             newCloneFolder.mkdir();
@@ -200,46 +205,6 @@ private void handleCommit(ActionEvent e) {
     saveCommit(commit, hash);
     addCommitToHistory(title, hash, commitDescriptionField.getText(), filesToCommit);
 }
-
-    /*private void handleCommit(ActionEvent event) {
-        String title = commitTitleField.getText().trim();
-        String description = commitDescriptionField.getText().trim();
-        if (title.isEmpty()) {
-            showAlert("Error", "Please enter a commit title.");
-            return;
-        }
-
-        ArrayList<FileMeta> filesToCommit = new ArrayList<>();
-        for (FileMeta f : Clone.currentFileList) {
-            filesToCommit.add(new FileMeta(f.getFilePath(), f.getHashcode()));
-        }
-
-        String commitHash = String.valueOf((title + System.currentTimeMillis()).hashCode());
-        CloneUnit commit = new CloneUnit(filesToCommit, commitHash);
-
-        try {
-            File commitsFolder = new File(Clone.targetFolderPath + File.separator + ".clone_/commits");
-            if (!commitsFolder.exists()) commitsFolder.mkdirs();
-            File commitFile = new File(commitsFolder, commitHash + ".clone");
-            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(commitFile))) {
-                oos.writeObject(commit);
-            }
-        } catch (IOException e) {
-            showAlert("Error", "Failed to save commit: " + e.getMessage());
-            return;
-        }
-
-        String formattedCommit = "🔹 " + title + " [" + commitHash + "]\n ↪ " + description;
-        committedChanges.add(0, formattedCommit);
-        historyListView.getItems().clear();
-        historyListView.getItems().addAll(committedChanges);
-
-        commitTitleField.clear();
-        commitDescriptionField.clear();
-
-        showAlert("Commit Successful", "Your changes have been committed!");
-    }*/
-
     @FXML
     private void handleViewHistory(ActionEvent event) {
         historyListView.getItems().clear();
@@ -327,7 +292,12 @@ private void handleDeleteProject(ActionEvent event) {
         // Delete project folder
         File projectFolder = new File(Clone.targetFolderPath, ".clone_" + currentProject);
         if (projectFolder.exists()) {
-            Clone.deleteDirectory(projectFolder);
+            try {
+                Clone.deleteDirectory(projectFolder);
+            } catch (IOException e) {
+                showAlert("Error", "Failed to delete project folder: " + e.getMessage());
+                return;
+            }
         }
 
         // Remove from ComboBox & map
@@ -420,17 +390,15 @@ private boolean hasUnsavedChanges() {
 }
     
     private void addCommitToHistory(String title, String hash, String description, ArrayList<FileMeta> files) {
-    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-
     StringBuilder sb = new StringBuilder();
-    sb.append("🔹 Commit: ").append(title).append("\n")
-      .append("   ⏱ ").append(timestamp).append("\n")
-      .append("   🔑 Hash: ").append(hash).append("\n");
+    sb.append("🔹 Commit: ").append(title).append("\n");
+    sb.append("   ⏱ ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))).append("\n");
+    sb.append("   🔑 Hash: ").append(hash).append("\n");
 
     if (!files.isEmpty()) {
         sb.append("   🗂 Files: ");
         for (int i = 0; i < files.size(); i++) {
-            sb.append(files.get(i).getFilePath());
+            sb.append(files.get(i).getFilePath().replace(Clone.targetFolderPath + "/", ""));
             if (i < files.size() - 1) sb.append(", ");
         }
     }
@@ -463,6 +431,4 @@ private boolean hasUnsavedChanges() {
     diffAlert.getDialogPane().setContent(diffArea);
     diffAlert.showAndWait();
 }
-   
-   
 }
