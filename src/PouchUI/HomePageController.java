@@ -287,6 +287,29 @@ private void refreshFileSelectionList() {
     }
     fileSelectionListView.setItems(boxes);
 }
+
+@FXML
+private void handlePreviewChanges(ActionEvent event) {
+    ObservableList<CheckBox> selectedFiles = fileSelectionListView.getItems();
+    boolean anySelected = false;
+
+    for (CheckBox cb : selectedFiles) {
+        if (cb.isSelected()) {
+            anySelected = true;
+            File file = new File(Clone.targetFolderPath, cb.getText());
+            try {
+                showDiffDialog(file);
+            } catch (IOException e) {
+                showAlert("Error", "Failed to preview file: " + file.getName() + "\n" + e.getMessage());
+            }
+        }
+    }
+
+    if (!anySelected) {
+        showAlert("No File Selected", "Please select at least one file to preview.");
+    }
+}
+
     // ========================= Helpers ===========================
 
     private void switchToProject(String projectName) {
@@ -351,7 +374,28 @@ private void refreshFileSelectionList() {
     }
 }
     
-   private void addCommitToHistory(String title, String hash, String description, ArrayList<FileMeta> files) {
+    private void addCommitToHistory(String title, String hash, String description, ArrayList<FileMeta> files) {
+    String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("🔹 Commit: ").append(title).append("\n")
+      .append("   ⏱ ").append(timestamp).append("\n")
+      .append("   🔑 Hash: ").append(hash).append("\n");
+
+    if (!files.isEmpty()) {
+        sb.append("   🗂 Files: ");
+        for (int i = 0; i < files.size(); i++) {
+            sb.append(files.get(i).getFilePath());
+            if (i < files.size() - 1) sb.append(", ");
+        }
+    }
+
+    committedChanges.add(0, sb.toString());
+    historyListView.getItems().setAll(committedChanges);
+}
+
+    
+   /*private void addCommitToHistory(String title, String hash, String description, ArrayList<FileMeta> files) {
     StringBuilder sb = new StringBuilder();
     sb.append("🔹 ").append(title).append(" [").append(hash).append("]\n ↪ ").append(description);
 
@@ -364,5 +408,30 @@ private void refreshFileSelectionList() {
 
     committedChanges.add(0, sb.toString());
     historyListView.getItems().setAll(committedChanges);
-} 
+}*/
+   
+   private void showDiffDialog(File file) throws IOException {
+    if (!file.exists()) {
+        showAlert("Error", "File does not exist: " + file.getName());
+        return;
+    }
+
+    // Read current content
+    String content = Files.readString(file.toPath());
+
+    // Create dialog
+    Alert diffAlert = new Alert(Alert.AlertType.INFORMATION);
+    diffAlert.setTitle("File Diff: " + file.getName());
+    diffAlert.setHeaderText("Changes detected in file:");
+
+    // Display content in non-editable TextArea
+    TextArea diffArea = new TextArea(content);
+    diffArea.setEditable(false);
+    diffArea.setWrapText(true);
+    diffArea.setPrefWidth(600);
+    diffArea.setPrefHeight(400);
+
+    diffAlert.getDialogPane().setContent(diffArea);
+    diffAlert.showAndWait();
+}
 }

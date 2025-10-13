@@ -80,3 +80,17 @@
     -fx-control-inner-background: #ffffff;
     -fx-border-color: #cccccc;
 }
+
+.file-selection-list {
+    -fx-background-color: #222; /* dark background for sidebar */
+    -fx-control-inner-background: #2e2e2e; /* inner background */
+    -fx-text-fill: white; /* text color */
+}
+
+.file-selection-list .list-cell:filled:selected {
+    -fx-background-color: #4CAF50; /* green highlight when selected */
+    -fx-text-fill: white;
+}
+
+
+

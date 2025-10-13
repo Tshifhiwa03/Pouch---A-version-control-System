@@ -59,6 +59,7 @@
                     <TextArea fx:id="commitDescriptionField" prefRowCount="5" promptText="Describe your changes..." />
 
                     <Button onAction="#handleCommit" styleClass="action-button" text="Commit Changes" />
+                    <Button onAction="#handlePreviewChanges" styleClass="action-button" text="Preview Changes" />
                 </VBox>
 
                 <!-- Right side: History panel -->
