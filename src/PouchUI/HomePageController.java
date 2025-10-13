@@ -17,6 +17,17 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import PouchVCS.Clone;
+import PouchVCS.CloneUnit;
+import PouchVCS.FileMeta;
+import PouchVCS.MyFileVisitor;
+import javafx.stage.DirectoryChooser;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;          // for ArrayList
+import java.io.FileOutputStream;      // for saving commit files
+import java.io.ObjectOutputStream;    // for serializing CloneUnit
 
 public class HomePageController implements Initializable {
 
@@ -49,18 +60,38 @@ public class HomePageController implements Initializable {
     // =========================
 
     @FXML
-    private void handleOpenRepo(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Repository Folder");
-        File selectedFile = fileChooser.showOpenDialog(new Stage());
+private void handleOpenRepo(ActionEvent event) {
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Open Repository Folder");
 
-        if (selectedFile != null) {
-            String repoName = selectedFile.getName();
-            System.out.println("Opened repository: " + selectedFile.getAbsolutePath());
-            showAlert("Repository Opened", "Opened repository: " + repoName);
-            logAction("Repository opened: " + repoName);
+    // Open a folder selection dialog
+    DirectoryChooser dirChooser = new DirectoryChooser();
+    dirChooser.setTitle("Select Repository Folder");
+    File selectedFolder = dirChooser.showDialog(new Stage());
+
+    if (selectedFolder != null) {
+        // 1️⃣ Save the folder path so your backend knows where to work
+        Clone.targetFolderPath = selectedFolder.getAbsolutePath();
+        Clone.detectCloneFolder(); // looks for any existing .clone_ folder
+
+        // 2️⃣ Get files in that folder using MyFileVisitor
+        try {
+            Clone.currentFileList.clear(); // clear previous files
+            Files.walkFileTree(selectedFolder.toPath(), new MyFileVisitor());
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        // 3️⃣ Show the files in the ListView
+        fileListView.getItems().clear();
+        for (FileMeta file : Clone.currentFileList) {
+            fileListView.getItems().add(file.getFilePath()
+                .replace(Clone.targetFolderPath + "/", ""));
+        }
+
+        showAlert("Repository Opened", "Opened repository: " + selectedFolder.getName());
     }
+}
 
     @FXML
     private void handleViewHistory(ActionEvent event) {
@@ -86,6 +117,54 @@ private void handleCommit(ActionEvent event) {
         showAlert("Error", "Please enter a commit title.");
         return;
     }
+
+    // Create a new CloneUnit
+    ArrayList<FileMeta> filesToCommit = new ArrayList<>();
+    for (FileMeta f : Clone.currentFileList) {
+        filesToCommit.add(new FileMeta(f.getFilePath(), f.getHashcode()));
+    }
+
+    // Generate a simple commit hash using title + timestamp
+    String commitHash = String.valueOf((title + System.currentTimeMillis()).hashCode());
+    CloneUnit commit = new CloneUnit(filesToCommit, commitHash);
+
+    // Save commit to .clone_/commits folder
+    try {
+        File cloneFolder = new File(Clone.targetFolderPath + File.separator + ".clone_");
+        File commitsFolder = new File(cloneFolder, "commits");
+        if (!commitsFolder.exists()) commitsFolder.mkdirs();
+
+        File commitFile = new File(commitsFolder, commitHash + ".clone");
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(commitFile))) {
+            oos.writeObject(commit);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+        showAlert("Error", "Failed to save commit!");
+        return;
+    }
+
+    // Update GUI history
+    String formattedCommit = "🔹 " + title + "\n ↪ " + description;
+    committedChanges.add(0, formattedCommit);
+    historyListView.getItems().clear();
+    historyListView.getItems().addAll(committedChanges);
+
+    // Clear input fields
+    commitTitleField.clear();
+    commitDescriptionField.clear();
+
+    showAlert("Commit Successful", "Your changes have been committed!");
+}
+
+/*private void handleCommit(ActionEvent event) {
+    String title = commitTitleField.getText().trim();
+    String description = commitDescriptionField.getText().trim();
+
+    if (title.isEmpty()) {
+        showAlert("Error", "Please enter a commit title.");
+        return;
+    }
     // Format the commit entry
     String formattedCommit = "🔹 " + title + "\n ↪ " + description;
     // Log the commit to history
@@ -100,8 +179,7 @@ private void handleCommit(ActionEvent event) {
     commitDescriptionField.clear();
 
     showAlert("Commit Successful", "Your changes have been committed.");
-}
-
+}*/
 
     @FXML
     private void handleFetch(ActionEvent event) {
@@ -115,10 +193,6 @@ private void handleCommit(ActionEvent event) {
         historyListView.getItems().clear();
         historyListView.getItems().addAll(committedChanges);
     }
-
-    // =========================
-    // HELPER METHODS
-    // =========================
 
     private void showAlert(String title, String message) {
         Alert alert = new Alert(AlertType.INFORMATION);

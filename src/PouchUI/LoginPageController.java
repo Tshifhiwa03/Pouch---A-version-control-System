@@ -12,11 +12,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javafx.scene.control.Alert;
+import PouchVCS.Clone;
+import PouchVCS.CloneUnit;
+import PouchVCS.FileMeta;
+import PouchVCS.MyFileVisitor;
+
 
 /**
  * Controller for the LoginPage.FXML.
