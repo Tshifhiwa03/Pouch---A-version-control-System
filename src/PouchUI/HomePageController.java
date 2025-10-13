@@ -170,7 +170,38 @@ public class HomePageController implements Initializable {
     }
 
     @FXML
-    private void handleCommit(ActionEvent event) {
+private void handleCommit(ActionEvent e) {
+    String title = commitTitleField.getText().trim();
+    if (title.isEmpty()) {
+        showAlert("Error", "Enter a commit title.");
+        return;
+    }
+
+    ArrayList<FileMeta> filesToCommit = new ArrayList<>();
+    for (CheckBox cb : fileSelectionListView.getItems()) {
+    if (cb.isSelected()) {
+        File f = new File(Clone.targetFolderPath, cb.getText());
+        try {
+            filesToCommit.add(new FileMeta(f.getPath(), MyFileVisitor.generateHashForFile(f)));
+        } catch (IOException ex) {
+            showAlert("Error", "Failed to hash file: " + f.getName());
+        }
+    }
+}
+
+
+    if (filesToCommit.isEmpty()) {
+        showAlert("Error", "Select at least one file to commit.");
+        return;
+    }
+
+    String hash = String.valueOf((title + System.currentTimeMillis()).hashCode());
+    CloneUnit commit = new CloneUnit(filesToCommit, hash);
+    saveCommit(commit, hash);
+    addCommitToHistory(title, hash, commitDescriptionField.getText(), filesToCommit);
+}
+
+    /*private void handleCommit(ActionEvent event) {
         String title = commitTitleField.getText().trim();
         String description = commitDescriptionField.getText().trim();
         if (title.isEmpty()) {
@@ -207,7 +238,7 @@ public class HomePageController implements Initializable {
         commitDescriptionField.clear();
 
         showAlert("Commit Successful", "Your changes have been committed!");
-    }
+    }*/
 
     @FXML
     private void handleViewHistory(ActionEvent event) {
@@ -305,4 +336,33 @@ private void refreshFileSelectionList() {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    
+    private void saveCommit(CloneUnit commit, String hash) {
+    try {
+        File commitsFolder = new File(Clone.targetFolderPath + File.separator + ".clone_/commits");
+        if (!commitsFolder.exists()) commitsFolder.mkdirs();
+
+        File commitFile = new File(commitsFolder, hash + ".clone");
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(commitFile))) {
+            oos.writeObject(commit);
+        }
+    } catch (IOException e) {
+        showAlert("Error", "Failed to save commit: " + e.getMessage());
+    }
+}
+    
+   private void addCommitToHistory(String title, String hash, String description, ArrayList<FileMeta> files) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("🔹 ").append(title).append(" [").append(hash).append("]\n ↪ ").append(description);
+
+    if (!files.isEmpty()) {
+        sb.append("\n   Files:");
+        for (FileMeta f : files) {
+            sb.append("\n   • ").append(f.getFilePath());
+        }
+    }
+
+    committedChanges.add(0, sb.toString());
+    historyListView.getItems().setAll(committedChanges);
+} 
 }

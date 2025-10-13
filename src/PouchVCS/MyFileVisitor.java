@@ -6,6 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -55,6 +60,25 @@ if (filePath.equals(repoPath + "uniqueclone.txt") || !filePath.startsWith(repoPa
             bos.write(buffer);
         } finally {
             bos.close();
+        }
+    }
+    
+     public static String generateHashForFile(File file) throws IOException {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                md.update(buffer, 0, bytesRead);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : md.digest()) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 not supported", e);
         }
     }
 }
