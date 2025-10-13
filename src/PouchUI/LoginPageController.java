@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javafx.scene.control.Alert;
+import java.sql.SQLException;
 
 /**
  * Controller for LoginPage.fxml.
@@ -62,12 +63,37 @@ public class LoginPageController {
         String[][] dbConfigs = {
             {"users", "root", "DrTnet@170621"},
             {"softwareprogramming", "root", "GhRyawbU@6"},
-            {"logins", "root", "Leandra@mysql24"}
+            {"logins", "root", "Leandra@mysql24"}, 
+            {"entry", "root", "Badbich_11"}
         };
 
         DataBaseConnection dbConn = new DataBaseConnection();
-
         for (String[] config : dbConfigs) {
+    String dbName = config[0];
+    String dbUser = config[1];
+    String dbPass = config[2];
+
+    try (Connection conn = dbConn.getConnection(dbName, dbUser, dbPass);
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        stmt.setString(1, username);
+        stmt.setString(2, password);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                System.out.println("Authenticated on database: " + dbName);
+                return true;
+            }
+        }
+
+    } catch (SQLException e) {
+        // Skip databases that cannot be connected to
+        System.out.println("Skipping unavailable database: " + dbName);
+    }
+}
+
+
+        /*for (String[] config : dbConfigs) {
             String dbName = config[0];
             String dbUser = config[1];
             String dbPass = config[2];
@@ -89,7 +115,7 @@ public class LoginPageController {
                 System.err.println("Database connection/authentication failed for: " + dbName);
                 e.printStackTrace();
             }
-        }
+        }*/
 
         return false;
     }

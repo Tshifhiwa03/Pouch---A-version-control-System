@@ -54,4 +54,7 @@ public class DataBaseConnection {
     public Connection getLoginsDatabaseConnection() throws SQLException {
         return getConnection("logins", "root", "Leandra@mysql24");
     } 
+    public Connection getEntryDatabaseConnection() throws SQLException {
+        return getConnection("entry", "root", "Badbich_11");
+    } 
 }
