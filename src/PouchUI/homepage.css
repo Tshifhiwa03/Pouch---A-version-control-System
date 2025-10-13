@@ -1,96 +1,127 @@
-/* ===================== GENERAL ===================== */
-.root {
-    -fx-font-family: "Segoe UI", sans-serif;
-    -fx-font-size: 14px;
+/* ===========================
+   Root and Panels
+=========================== */
+.mainFxmlClass, #root {
+    -fx-background-color: #0d0d1a; /* dark navy for the main background */
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* ===================== LEFT PANEL ===================== */
+/* Left Panel - Project Files */
 .left-panel {
-    -fx-background-color: #1b1b1b; /* Dark sidebar */
+    -fx-background-color: #1a1a2e; /* darker navy/purple */
     -fx-padding: 10;
+    -fx-border-width: 0 1 0 0;
+    -fx-border-color: #2c2c44; /* subtle separation line */
 }
 
-.left-panel-title {
-    -fx-text-fill: #ffffff;
+.left-panel .list-view {
+    -fx-background-color: #222233;
+    -fx-control-inner-background: #222233;
+    -fx-text-fill: #cfcfff; /* light purple text */
+}
+
+.left-panel .list-view .list-cell:filled:selected {
+    -fx-background-color: #6c63ff; /* highlight selection */
+    -fx-text-fill: white;
+}
+
+/* Center Panel - Commit + History */
+.center-panel {
+    -fx-background-color: #f5f5f5; /* light/white area */
+    -fx-padding: 15;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(108, 99, 255, 0.2), 20, 0.5, 0, 0);
+}
+
+/* Commit File Selection List */
+.file-selection-list {
+    -fx-background-color: #222233;
+    -fx-control-inner-background: #2c2c44;
+    -fx-text-fill: #e0e0ff;
+}
+
+.file-selection-list .list-cell:filled:selected {
+    -fx-background-color: #6c63ff; /* highlight selection */
+    -fx-text-fill: white;
+}
+
+/* History Panel */
+.history-panel {
+    -fx-background-color: #ececec; 
+    -fx-padding: 10;
+    -fx-border-radius: 6px;
+}
+
+/* Right Panel */
+.right-panel {
+    -fx-background-color: #d9d9f0; /* neutral light */
+    -fx-padding: 10;
+    -fx-border-width: 0 0 0 1; /* top right bottom left */
+    -fx-border-color: transparent transparent transparent #b0b0d0;
+}
+
+
+/* Labels */
+.panel-title {
+    -fx-text-fill: #6c63ff; /* purple accent */
+    -fx-font-weight: bold;
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
 }
 
-.left-panel-list {
-    -fx-background-color: #2b2b2b;
-    -fx-control-inner-background: #2b2b2b;
-    -fx-text-fill: #ffffff;
-}
-
-/* ===================== CENTER PANEL ===================== */
-.center-title {
-    -fx-font-size: 18px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #333333;
-}
-
-.center-subtitle {
-    -fx-font-size: 14px;
-    -fx-text-fill: #666666;
-}
-
-.section-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #2a2a2a;
-}
-
-/* Input fields */
-.input-field {
-    -fx-padding: 5;
-    -fx-border-color: #cccccc;
-    -fx-border-radius: 3;
-    -fx-background-radius: 3;
-}
-
-.input-area {
-    -fx-padding: 5;
-    -fx-border-color: #cccccc;
-    -fx-border-radius: 3;
-    -fx-background-radius: 3;
+.panel-subtitle {
+    -fx-text-fill: #9a9aff;
+    -fx-font-size: 13px;
 }
 
 /* Buttons */
 .action-button {
-    -fx-background-color: #4a90e2;
+    -fx-background-color: linear-gradient(to right, #6c63ff, #8a79ff);
     -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-padding: 5 10 5 10;
-    -fx-border-radius: 3;
-    -fx-background-radius: 3;
+    -fx-padding: 8 15;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
 }
 
 .action-button:hover {
-    -fx-background-color: #357abd;
+    -fx-background-color: linear-gradient(to right, #7d73ff, #9a88ff);
+    -fx-effect: dropshadow(gaussian, rgba(108, 99, 255, 0.5), 15, 0.5, 0, 0);
 }
 
-/* ===================== RIGHT PANEL ===================== */
-.right-panel {
-    -fx-background-color: #f5f5f5;
-    -fx-padding: 10;
+/* ComboBoxes */
+.combo-box {
+    -fx-background-color: #2c2c44;
+    -fx-control-inner-background: #2c2c44;
+    -fx-text-fill: #e0e0ff;
 }
 
-.right-panel-list {
-    -fx-background-color: #ffffff;
-    -fx-control-inner-background: #ffffff;
-    -fx-border-color: #cccccc;
+/* TextFields and TextAreas */
+.text-field, .text-area {
+    -fx-background-color: #2c2c44;
+    -fx-control-inner-background: #2c2c44;
+    -fx-text-fill: #e0e0ff;
+    -fx-prompt-text-fill: #b0b0ff;
+    -fx-border-color: #6c63ff;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
 }
 
-.file-selection-list {
-    -fx-background-color: #222; /* dark background for sidebar */
-    -fx-control-inner-background: #2e2e2e; /* inner background */
-    -fx-text-fill: white; /* text color */
-}
-
-.file-selection-list .list-cell:filled:selected {
-    -fx-background-color: #4CAF50; /* green highlight when selected */
+/* Tooltips */
+.tooltip {
+    -fx-background-color: #6c63ff;
     -fx-text-fill: white;
 }
 
+/* Hover effects for ListViews */
+.list-cell:hover {
+    -fx-background-color: rgba(108, 99, 255, 0.2);
+}
 
+/* Scrollbars (optional refinement) */
+.scroll-bar:vertical .thumb {
+    -fx-background-color: #6c63ff;
+}
 
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #6c63ff;
+}

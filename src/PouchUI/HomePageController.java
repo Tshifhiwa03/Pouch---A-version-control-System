@@ -222,7 +222,7 @@ private void handleCommit(ActionEvent e) {
         showAlert("History Loaded", "Full activity history loaded successfully.");
     }
 
-    @FXML
+@FXML
 private void handleRollback(ActionEvent event) {
     String selectedCommit = historyListView.getSelectionModel().getSelectedItem();
     if (selectedCommit == null) {
@@ -259,7 +259,6 @@ private void handleRollback(ActionEvent event) {
         showAlert("Error", "Rollback failed: " + e.getMessage());
     }
 }
-
 
     @FXML
     private void handleSaveClone(ActionEvent event) {
