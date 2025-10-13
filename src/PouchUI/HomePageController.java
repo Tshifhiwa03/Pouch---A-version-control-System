@@ -78,8 +78,18 @@ public class HomePageController implements Initializable {
                 switchToProject(selectedProject);
             }
         });
-    }
-
+        
+        historyListView.setOnMouseClicked(event -> {
+        String selectedCommit = historyListView.getSelectionModel().getSelectedItem();
+        if (selectedCommit != null) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Commit Details");
+            alert.setHeaderText("Selected Commit");
+            alert.setContentText(selectedCommit);
+            alert.showAndWait();
+        }
+    });
+}
     // ========================= Actions =============================
 
     @FXML
@@ -213,21 +223,43 @@ private void handleCommit(ActionEvent e) {
     }
 
     @FXML
-    private void handleRollback(ActionEvent event) {
-        String selectedCommit = historyListView.getSelectionModel().getSelectedItem();
-        if (selectedCommit == null) {
-            showAlert("Error", "Please select a commit to roll back to.");
-            return;
-        }
-
-        String hashCode = selectedCommit.replaceAll(".*\\[(\\w+)\\].*", "$1");
-        try {
-            Clone.selectClone(hashCode);
-            showAlert("Rollback Successful", "Rolled back to commit: " + hashCode);
-        } catch (IOException e) {
-            showAlert("Error", "Rollback failed: " + e.getMessage());
-        }
+private void handleRollback(ActionEvent event) {
+    String selectedCommit = historyListView.getSelectionModel().getSelectedItem();
+    if (selectedCommit == null) {
+        showAlert("Error", "Please select a commit to roll back to.");
+        return;
     }
+
+    // Extract hash from the commit text
+    String hash = selectedCommit.lines()
+                                .filter(line -> line.startsWith("   🔑 Hash: "))
+                                .findFirst()
+                                .map(line -> line.replace("   🔑 Hash: ", ""))
+                                .orElse(null);
+
+    if (hash == null) {
+        showAlert("Error", "Could not extract hash from commit.");
+        return;
+    }
+
+    // Confirm rollback
+    Alert confirm = new Alert(AlertType.CONFIRMATION);
+    confirm.setTitle("Confirm Rollback");
+    confirm.setHeaderText("Rollback to commit: " + hash);
+    confirm.setContentText("This will overwrite current files. Continue?");
+    Optional<ButtonType> result = confirm.showAndWait();
+    if (result.isEmpty() || result.get() != ButtonType.OK) return;
+
+    try {
+        Clone.selectClone(hash);
+        showAlert("Rollback Successful", "Rolled back to commit: " + hash);
+        refreshFileSelectionList();
+        refreshFileListView();
+    } catch (IOException e) {
+        showAlert("Error", "Rollback failed: " + e.getMessage());
+    }
+}
+
 
     @FXML
     private void handleSaveClone(ActionEvent event) {
@@ -310,6 +342,9 @@ private void handleDeleteProject(ActionEvent event) {
         centerSubtitleLabel.setText("Project deleted successfully!");
     }
 }
+
+
+
     // ========================= Helpers ===========================
 
     private void switchToProject(String projectName) {
