@@ -278,6 +278,31 @@ public static void deleteDirectory(File dir) throws IOException {
         setHeadClone(hashCode);
         System.out.println("\n\tClone " + YELLOW_COLOR + hashCode.substring(0,7) + RESET + " has been saved successfully.\n");
     }
+    
+    public static void saveCommit(ArrayList<FileMeta> filesToCommit, String title, String description) throws IOException, NoSuchAlgorithmException {
+    if (filesToCommit == null || filesToCommit.isEmpty()) {
+        System.out.println("No files selected to commit.");
+        return;
+    }
+
+    currentFileList = filesToCommit; // Update current file list
+
+    saveNewFiles(); // Save files to .clone repository
+    String hashCode = generateHashCode();
+
+    CloneUnit newCloneUnit = new CloneUnit(currentFileList, hashCode, title, description); // Include title/description
+    cloneList.add(newCloneUnit);
+
+    String cloneListFilePath = mainRepoPath + "clones/cloneList.clone";
+    writeFileContent(cloneListFilePath, cloneList);
+
+    setHeadClone(hashCode);
+    System.out.println("\nClone " + YELLOW_COLOR + hashCode.substring(0, 7) + RESET + " saved successfully.\n");
+}
+    
+    public static ArrayList<CloneUnit> getCloneList() {
+    return cloneList;
+}
 
     private static void saveNewFiles() {
         String filePath = mainRepoPath + "content-hashcodes/contenthashcodes.clone";
@@ -482,7 +507,7 @@ public static void deleteDirectory(File dir) throws IOException {
         }
         System.out.println("\n\tWrong code\n");
     }
-
+    
     private static void activateClone(CloneUnit clone) throws IOException {
         String folderPathOfContent = mainRepoPath + "clones/filedata/";
         for (FileMeta fileMeta : clone.getFileList()) {

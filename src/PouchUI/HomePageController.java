@@ -183,9 +183,42 @@ public class HomePageController implements Initializable {
             showAlert("Error", "Failed to create new project: " + e.getMessage());
         }
     }
+@FXML
+private void handleCommit(ActionEvent event) {
+    ObservableList<CheckBox> selectedFiles = fileSelectionListView.getItems();
+    ArrayList<FileMeta> filesToCommit = new ArrayList<>();
 
-    @FXML
-private void handleCommit(ActionEvent e) {
+    for (CheckBox cb : selectedFiles) {
+        if (cb.isSelected()) {
+            File file = new File(Clone.targetFolderPath, cb.getText());
+            try {
+                String hash = MyFileVisitor.generateHashForFile(file);  // Compute current hash
+                filesToCommit.add(new FileMeta(file.getPath(), hash));
+            } catch (IOException e) {
+                showAlert("Error", "Failed to generate hash for file: " + file.getName() + "\n" + e.getMessage());
+                return; // stop committing if one file fails
+            }
+        }
+    }
+
+    if (filesToCommit.isEmpty()) {
+        showAlert("No files selected", "Please select at least one file to commit.");
+        return;
+    }
+
+    try {
+        Clone.saveCommit(filesToCommit, commitTitleField.getText(), commitDescriptionField.getText());
+        showAlert("Success", "Commit saved successfully.");
+        updateHistoryListView();  // Refresh history view
+        commitTitleField.clear();
+        commitDescriptionField.clear();
+    } catch (Exception e) {
+        showAlert("Commit Error", "Failed to save commit:\n" + e.getMessage());
+    }
+}
+
+
+/*private void handleCommit(ActionEvent e) {
     String title = commitTitleField.getText().trim();
     if (title.isEmpty()) {
         showAlert("Error", "Enter a commit title.");
@@ -214,7 +247,7 @@ private void handleCommit(ActionEvent e) {
     CloneUnit commit = new CloneUnit(filesToCommit, hash);
     saveCommit(commit, hash);
     addCommitToHistory(title, hash, commitDescriptionField.getText(), filesToCommit);
-}
+}*/
     @FXML
     private void handleViewHistory(ActionEvent event) {
         historyListView.getItems().clear();
@@ -273,12 +306,9 @@ private void handleRollback(ActionEvent event) {
     @FXML private ListView<CheckBox> fileSelectionListView;
 
 private void refreshFileSelectionList() {
-    fileSelectionListView.getItems().clear();
     ObservableList<CheckBox> boxes = FXCollections.observableArrayList();
-
     for (FileMeta file : Clone.currentFileList) {
-        CheckBox cb = new CheckBox(file.getFilePath()
-                                   .replace(Clone.targetFolderPath + "/", ""));
+        CheckBox cb = new CheckBox(file.getFilePath().replace(Clone.targetFolderPath + "/", ""));
         boxes.add(cb);
     }
     fileSelectionListView.setItems(boxes);
@@ -465,4 +495,18 @@ private boolean hasUnsavedChanges() {
     diffAlert.getDialogPane().setContent(diffArea);
     diffAlert.showAndWait();
 }
+
+   private void updateHistoryListView() {
+    ObservableList<String> items = FXCollections.observableArrayList();
+    try {
+        for (CloneUnit clone : Clone.getCloneList()) {
+            String display = "🔹 " + clone.getTitle() + " [" + clone.getCloneHashcode().substring(0, 7) + "]";
+            items.add(display);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    historyListView.setItems(items);
+}
+
 }
