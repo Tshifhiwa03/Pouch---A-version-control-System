@@ -18,7 +18,10 @@
     <top>
         <HBox spacing="10" styleClass="top-bar">
             <padding><Insets bottom="10" left="10" right="10" top="10" /></padding>
-            <Label text="Select Project:" />
+            <Label text="Select Project:" textFill="#4e58ae">
+            <font>
+               <Font size="15.0" />
+            </font></Label>
             <ComboBox fx:id="projectsComboBox" prefWidth="200" />
             <Button onAction="#handleNewProjectButton" text="New Project" />
             <Button onAction="#handleOpenRepo" text="Open Repo" />
@@ -65,7 +68,7 @@
                 <!-- Right side: History panel -->
                 <VBox spacing="10" styleClass="history-panel" HBox.hgrow="ALWAYS">
                     <Label styleClass="section-header" text="Commit History" />
-                    <ListView fx:id="historyListView" prefHeight="300" />
+                    <ListView fx:id="historyListView" prefHeight="300" VBox.vgrow="ALWAYS" />
                     <HBox spacing="8">
                         <Button onAction="#handleViewHistory" text="View History" />
                         <Button onAction="#handleRollback" text="Rollback" />

@@ -125,3 +125,15 @@
 .scroll-bar:horizontal .thumb {
     -fx-background-color: #6c63ff;
 }
+
+.top-bar .combo-box {
+    -fx-background-color: #2e2e2e; /* Dark background for contrast */
+    -fx-text-fill: #ffffff;       /* Bright white text */
+    -fx-font-weight: bold;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.top-bar .combo-box .list-cell {
+    -fx-text-fill: #ffffff; /* Ensure dropdown list items are bright */
+}
