@@ -244,7 +244,7 @@ public static void deleteDirectory(File dir) {
         writeFileContent(filePath, currentFileList);
     }
 
-    private static void save() throws IOException, NoSuchAlgorithmException {
+    public static void save() throws IOException, NoSuchAlgorithmException {
         getCurrentFileList();
         if (currentFileList.size() == 0) {
             System.out.println("\n\tNeed to make a clone before save. use " + RED_COLOR + "clone make" + RESET + "\n");
@@ -459,7 +459,7 @@ public static void deleteDirectory(File dir) {
     }
 
     /* Activating clone */
-    private static void selectClone(String hashCode) throws IOException {
+    public static void selectClone(String hashCode) throws IOException {
         if (cloneList.size() == 0) takeClones();
 
         for (CloneUnit cloneUnit : cloneList) {
